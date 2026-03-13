@@ -13,7 +13,8 @@ if __name__ == "__main__":
     # 1. 实例化技能服务（可指定自定义技能根目录）
     ai_skill_service = AISkillService(skill_root_dir="./skills")
     # 3. 处理查询（核心对外接口）
-    query="我要生成一个Python脚本，功能是读取一个文本文件，统计其中每个单词出现的次数，并将结果写入另一个文件。"
+    #query="我要生成一个Python脚本，计算两个数相乘，"
+    query="123123*343245是多少？"
     result = ai_skill_service.process_query(query)
 
     # 4. 输出结果

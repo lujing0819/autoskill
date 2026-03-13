@@ -6,6 +6,9 @@ import sys
 from io import StringIO
 import json
 import os
+import subprocess
+import shlex
+import sys
 @tool
 def create_directory(path):
     """
@@ -128,51 +131,52 @@ def generate_content(content):
     return result
 
 @tool
-def execute_code(code_str, result_var='result'):
+def execute_code(command, result_var='result'):
     """
-    在隔离的命名空间中执行给定的 Python 代码字符串，并捕获执行结果、标准输出和错误信息。
-    此函数专为智能体调用设计，允许动态运行代码片段并获取其输出和返回值。
+    运行python脚本时，执行代码字符串并返回结果  
+    在隔离环境中执行给定的命令行指令，并捕获执行结果、标准输出和错误信息。
+    此函数专为智能体调用设计，允许动态运行命令行并获取输出与返回状态。
 
     参数
     ----------
-    code_str : str
-        要执行的 Python 代码字符串。代码将在空的命名空间中运行，无法访问外部变量。
-    result_var : str, 可选
-        代码执行后需要从命名空间中提取的变量名（默认为 'result'）。
-        执行后，函数会尝试从命名空间中获取该变量的值作为主要返回结果。
+    command : str
+        要执行的命令行指令字符串，例如 "python test.py"、"ls"、"dir" 等。
 
     返回值
     -------
     tuple
-        (result, output, error) 包含三个元素：
-        - result : any
-            从命名空间中获取的 result_var 变量的值。如果变量不存在或代码执行出错，则为 None。
+        (returncode, output, error) 包含三个元素：
+        - returncode : int
+            命令执行后的返回码，0 表示成功，非 0 表示失败。
         - output : str
-            代码执行期间捕获的标准输出（通过 print 等打印的内容）。
-        - error : str 或 None
-            如果执行过程中发生异常，返回异常信息的字符串表示；否则为 None。
+            命令执行期间捕获的标准输出（stdout）。
+        - error : str
+            命令执行期间捕获的标准错误（stderr）。
 
     注意事项
     --------
-    - 由于 exec 在空的命名空间中执行，代码中定义的变量（包括 result_var）都位于该局部命名空间内。
-    - 此函数会临时替换 sys.stdout 以捕获输出，因此不会影响外部环境的输出。
-    - **安全警告**：exec 可以执行任意代码，请确保 code_str 来源可信，避免执行恶意或不受信任的代码。
-    - 如果代码语法错误或运行时异常，error 将包含异常信息，此时 result 为 None。
- 
+    - 命令将在独立的子进程中运行，不会污染当前程序环境。
+    - 执行超时、命令不存在、权限不足等异常都会被捕获并返回错误信息。
+    - **安全警告**：请勿执行来源不可信的命令，避免注入攻击或恶意操作。
     """
-    # 准备命名空间
-    namespace = {}
-    # 捕获输出
-    old_stdout = sys.stdout
-    sys.stdout = StringIO()
-    error = None
-    try:
-        exec(code_str, namespace)
-    except Exception as e:
-        error = str(e)
-    finally:
-        output = sys.stdout.getvalue()
-        sys.stdout = old_stdout
+    #try:
+    if True:
+        # 安全解析字符串命令
+        args = shlex.split(command)
+        # 替换为当前环境的 python 路径，避免环境错误
+        if args[0] == "python":
+            args[0] = sys.executable
+        print ("aaa",args)
+        # 执行命令
+        
+        result = subprocess.run(
+            args,
+            capture_output=True,
+            text=True,
+            encoding="gbk",
+        )
 
-    result = namespace.get(result_var)
-    return result, output, error
+        return result.returncode, result.stdout.strip(), result.stderr.strip()
+
+    # except Exception as e:
+    #     return -1, "", f"执行异常：{str(e)}"

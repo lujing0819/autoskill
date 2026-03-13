@@ -5,7 +5,7 @@ import re
 from qwen_config import llm
 from langchain_openai import ChatOpenAI
 from langchain.messages import HumanMessage, SystemMessage,AIMessage,ToolMessage
-from SkillUtils import generate_and_exe_code,generate_content,read_file,write_file,create_directory
+from SkillUtils import read_file,write_file,create_directory,execute_code
 from langchain.agents import create_agent 
 from datetime import datetime
 
@@ -111,10 +111,11 @@ class AISkillService:
  
         skill_agents = []
         from langchain_core.tools import StructuredTool
+        #构建各个子智能体
         for skill in self.skill_schema:
             name=skill["name"]
             #完整加载提示词
-            agent=create_agent(llm,system_prompt=skill["all_description"],tools=[read_file,write_file,create_directory])
+            agent=create_agent(llm,system_prompt=skill["all_description"],tools=[read_file,write_file,create_directory,execute_code])
 
             #只加载部分提示词
             tool = StructuredTool.from_function(
@@ -132,4 +133,6 @@ class AISkillService:
         #result=router_agent.invoke({"messages": HumanMessage(content=query)})
         for s in router_agent.stream({"messages": HumanMessage(content=query)}):
             print (s)
+        # for s in agent.stream({"messages": HumanMessage(content=query)}):
+        #     print (s)
         #return result
