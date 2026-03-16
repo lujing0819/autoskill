@@ -85,30 +85,7 @@ def write_file(path, content, mode='w', encoding='utf-8'):
         return f"成功写入文件：{path}"
     except Exception as e:
         return f"写入失败：{str(e)}"
-@tool
-def generate_and_exe_code(content):
-    """
-    代码生成器
-
-    该函数根据用户输入的需求描述（content），构造提示词并调用大模型生成可直接运行的 Python 代码。
-    生成的代码必须将最终计算结果赋值给变量 `result`。函数会从模型响应中提取代码块，并返回可执行代码
-     
-
-    Args:
-        content (str): 描述需要解决的问题或待处理的数据，用于指导 LLM 生成代码。
-    Returns:
-        any: 如果代码生成和执行成功，返回代码执行后 `result` 变量的值（具体类型由生成的代码决定）。
-        str: 如果代码解析失败，返回字符串 "代码解析失败"。
-    """
-    print (f"正在生成代码，输入内容长度：{len(content)}")
-    prompt=f"{content} 根据上述信息，生成可以直接执行的代码，请只输出纯文本代码，不要用 ``` 包裹。"
-    # print (prompt)
-    # result=llm_large.invoke(prompt).content
-    # code=get_code(result)
-    with open("code.py") as f:
-        code=f.read()
-    print (f"生成的代码长度：{len(code)}，内容预览...")
-    return code
+ 
 
 @tool
 def generate_content(content):
@@ -130,7 +107,7 @@ def generate_content(content):
     result=llm_large.invoke(content).content
     return result
 
-@tool
+#@tool
 def execute_code(command, result_var='result'):
     """
     运行python脚本时，执行代码字符串并返回结果  
@@ -159,8 +136,7 @@ def execute_code(command, result_var='result'):
     - 执行超时、命令不存在、权限不足等异常都会被捕获并返回错误信息。
     - **安全警告**：请勿执行来源不可信的命令，避免注入攻击或恶意操作。
     """
-    #try:
-    if True:
+    try:
         # 安全解析字符串命令
         args = shlex.split(command)
         # 替换为当前环境的 python 路径，避免环境错误
@@ -178,5 +154,5 @@ def execute_code(command, result_var='result'):
 
         return result.returncode, result.stdout.strip(), result.stderr.strip()
 
-    # except Exception as e:
-    #     return -1, "", f"执行异常：{str(e)}"
+    except Exception as e:
+        return -1, "", f"执行异常：{str(e)}"
