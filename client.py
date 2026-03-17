@@ -13,8 +13,8 @@ if __name__ == "__main__":
     # 1. 实例化技能服务（可指定自定义技能根目录）
     ai_skill_service = AISkillService(skill_root_dir="./skills")
     # 3. 处理查询（核心对外接口）
-    query="我要生成一个Python程序，用来进行求定积分"
-    #query="123123*343245是多少？"
+    #query="我要生成一个Python程序，用来进行求定积分"
+    #query='计算积分x**2, 下界是0, 上界是1'
     result = ai_skill_service.process_query(query)
 
     # 4. 输出结果
